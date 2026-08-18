@@ -15,7 +15,7 @@ const app = new Hono();
 app.use(
   '*',
   cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.PORT,
     credentials: true,
   })
 );
