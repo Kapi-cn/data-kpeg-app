@@ -1,0 +1,23 @@
+.layout-light {
+  --surface: white;
+  --surface-alt: oklch(96.7% 0.001 286.375);
+
+  --text: oklch(55.2% 0.016 285.938);
+  --text-muted: oklch(70.5% 0.015 286.067);
+
+  --title: oklch(27.4% 0.006 286.033);
+
+  --border: oklch(92% 0.004 286.32);
+}
+
+.layout-dark {
+  --surface: oklch(20.8% 0.042 265.755);
+  --surface-alt: oklch(27.9% 0.041 260.031);
+
+  --text: oklch(55.4% 0.046 257.417);
+  --text-muted: oklch(70.4% 0.04 256.788);
+  
+  --title: white;
+
+  --border: oklch(27.9% 0.041 260.031);
+}
