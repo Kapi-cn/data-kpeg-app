@@ -1,13 +1,12 @@
 import { For, Show, createSignal } from 'solid-js';
-import { FiX, FiUsers, FiPlus, FiSearch, FiUserCheck, FiBriefcase, FiMapPin, FiShield } from 'solid-icons/fi';
+import { FiX, FiUsers, FiPlus, FiSearch, FiShield, FiTrash2, FiEdit3 } from 'solid-icons/fi';
 
-import { createPegawai } from '../../services/pegawai.js';
+import { createPegawai, updatePegawai, deletePegawai } from '../../services/pegawai.js';
 
 export default function MasterPegawaiModal(props) {
   const [search, setSearch] = createSignal('');
   const [nama, setNama] = createSignal('');
-  const [jabatan, setJabatan] = createSignal('');
-  const [divisi, setDivisi] = createSignal('Umum');
+  const [editingId, setEditingId] = createSignal(null);
   const [submitting, setSubmitting] = createSignal(false);
 
   const visiblePegawai = () => {
@@ -16,10 +15,12 @@ export default function MasterPegawaiModal(props) {
 
     if (!query) return list;
 
-    return list.filter((pegawai) => {
-      const text = `${pegawai.nama || ''} ${pegawai.jabatan || ''} ${pegawai.divisi || ''}`.toLowerCase();
-      return text.includes(query);
-    });
+    return list.filter((pegawai) => (pegawai.nama || '').toLowerCase().includes(query));
+  };
+
+  const resetForm = () => {
+    setNama('');
+    setEditingId(null);
   };
 
   const handleSubmit = async () => {
@@ -31,20 +32,39 @@ export default function MasterPegawaiModal(props) {
 
     try {
       setSubmitting(true);
-      await createPegawai({
-        nama: value,
-        jabatan: jabatan().trim(),
-        divisi: divisi().trim() || 'Umum',
-      });
 
-      setNama('');
-      setJabatan('');
-      setDivisi('Umum');
+      if (editingId()) {
+        await updatePegawai(editingId(), { nama: value });
+      } else {
+        await createPegawai({ nama: value });
+      }
+
+      resetForm();
       await props.onRefresh?.();
     } catch (error) {
-      alert(error.message || 'Gagal menambah pegawai.');
+      alert(error.message || 'Gagal menyimpan pegawai.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleEdit = (pegawai) => {
+    setEditingId(pegawai.id);
+    setNama(pegawai.nama || '');
+  };
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm('Apakah Anda yakin ingin menghapus pegawai ini?');
+    if (!confirmed) return;
+
+    try {
+      await deletePegawai(id);
+      if (editingId() === id) {
+        resetForm();
+      }
+      await props.onRefresh?.();
+    } catch (error) {
+      alert(error.message || 'Gagal menghapus pegawai.');
     }
   };
 
@@ -80,7 +100,7 @@ export default function MasterPegawaiModal(props) {
           </div>
 
           <div class=':uno: space-y-5 overflow-y-auto p-6'>
-            <div class=':uno: grid gap-3 md:grid-cols-[1.2fr_1fr_1fr_auto]'>
+            <div class=':uno: grid gap-3 md:grid-cols-[1fr_auto]'>
               <div>
                 <label class=':uno: mb-1.5 block text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-500'>
                   Nama Pegawai
@@ -94,32 +114,6 @@ export default function MasterPegawaiModal(props) {
                 />
               </div>
 
-              <div>
-                <label class=':uno: mb-1.5 block text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-500'>
-                  Jabatan
-                </label>
-                <input
-                  type='text'
-                  value={jabatan()}
-                  onInput={(e) => setJabatan(e.currentTarget.value)}
-                  placeholder='Staff'
-                  class=':uno: w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-800 focus:(border-primary/80 outline-2 outline-primary/20)'
-                />
-              </div>
-
-              <div>
-                <label class=':uno: mb-1.5 block text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-500'>
-                  Divisi
-                </label>
-                <input
-                  type='text'
-                  value={divisi()}
-                  onInput={(e) => setDivisi(e.currentTarget.value)}
-                  placeholder='Umum'
-                  class=':uno: w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-800 focus:(border-primary/80 outline-2 outline-primary/20)'
-                />
-              </div>
-
               <div class=':uno: flex items-end'>
                 <button
                   type='button'
@@ -128,7 +122,7 @@ export default function MasterPegawaiModal(props) {
                   class=':uno: inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2.5 text-[11px] font-black text-white shadow-md shadow-orange-500/30 disabled:opacity-60'
                 >
                   <FiPlus size={14} />
-                  {submitting() ? 'Menyimpan...' : 'Tambah'}
+                  {submitting() ? 'Menyimpan...' : editingId() ? 'Simpan Perubahan' : 'Tambah'}
                 </button>
               </div>
             </div>
@@ -142,7 +136,7 @@ export default function MasterPegawaiModal(props) {
                   type='text'
                   value={search()}
                   onInput={(e) => setSearch(e.currentTarget.value)}
-                  placeholder='Cari pegawai, jabatan, atau divisi...'
+                  placeholder='Cari nama pegawai...'
                   class=':uno: w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-xs text-slate-800 focus:(border-primary/80 outline-2 outline-primary/20)'
                 />
               </div>
@@ -176,25 +170,30 @@ export default function MasterPegawaiModal(props) {
 
                           <div class=':uno: min-w-0'>
                             <p class=':uno: truncate text-xs font-bold text-slate-900'>{pegawai.nama || 'Pegawai'}</p>
-                            <p class=':uno: mt-0.5 flex items-center gap-1.5 text-[10px] text-slate-500'>
-                              <FiBriefcase class='w-3 h-3 text-orange-500' />
-                              <span class='truncate'>{pegawai.jabatan || 'Staff'}</span>
-                            </p>
-                            <p class=':uno: mt-0.5 flex items-center gap-1.5 text-[10px] text-slate-500'>
-                              <FiMapPin class='w-3 h-3 text-rose-500' />
-                              <span class='truncate'>{pegawai.divisi || 'Umum'}</span>
-                            </p>
                           </div>
                         </div>
 
-                        <button
-                          type='button'
-                          onClick={() => props.onSelect?.(pegawai.id)}
-                          class=':uno: inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[10px] font-bold text-emerald-700 transition-colors hover:bg-emerald-100'
-                        >
-                          <FiUserCheck size={12} />
-                          Pilih
-                        </button>
+                        <div class=':uno: flex items-center gap-1.5'>
+                          <button
+                            type='button'
+                            onClick={() => handleEdit(pegawai)}
+                            class=':uno: inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700 transition-colors hover:bg-amber-100'
+                            title='Edit pegawai'
+                          >
+                            <FiEdit3 size={11} />
+                            Ubah
+                          </button>
+
+                          <button
+                            type='button'
+                            onClick={() => handleDelete(pegawai.id)}
+                            class=':uno: inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-700 transition-colors hover:bg-rose-100'
+                            title='Hapus pegawai'
+                          >
+                            <FiTrash2 size={11} />
+                            Hapus
+                          </button>
+                        </div>
                       </div>
                     )}
                   </For>

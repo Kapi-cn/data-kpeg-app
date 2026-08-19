@@ -8,17 +8,27 @@ import authRoute from './routes/auth.routes.js';
 import pegawaiRoute from './routes/pegawai.route.js';
 import dashboardRoute from './routes/dashboard.routes.js';
 
+import 'dotenv/config';
+import { serveStatic } from '@hono/node-server/serve-static';
+
 import pool from './config/database.js';
 
 const app = new Hono();
 
-app.use(
-  '*',
-  cors({
-    origin: process.env.PORT,
-    credentials: true,
-  })
-);
+if (process.env.NODE_ENV === 'production') {
+  app.use('../assets/*', serveStatic({ root: '../client/dist/assets' }));
+  app.use('*', serveStatic({ root: '../client/dist' }));
+}
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(
+    '*',
+    cors({
+      origin: 'http://localhost:5173',
+      credentials: true,
+    })
+  );
+}
 
 pool.getConnection()
   .then((connection) => {
@@ -31,16 +41,10 @@ pool.getConnection()
 
 app.use('*', logger);
 
-app.get('/', (c) => {
-  return c.json({
-    message: 'API is running'
-  });
-});
-
-app.route('/auth', authRoute);
-app.route('/kegiatan', kegiatanRoute);
-app.route('/pegawai', pegawaiRoute);
-app.route('/dashboard', dashboardRoute);
+app.route('/api/auth', authRoute);
+app.route('/api/kegiatan', kegiatanRoute);
+app.route('/api/pegawai', pegawaiRoute);
+app.route('/api/dashboard', dashboardRoute);
 
 serve({
   fetch: app.fetch,

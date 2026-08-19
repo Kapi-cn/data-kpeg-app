@@ -1,7 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL;
-
 export const getSidebarStats = async () => {
-  const response = await fetch(`${API_URL}/dashboard`, {
+  const response = await fetch(`/api/dashboard`, {
     credentials: 'include',
   });
 

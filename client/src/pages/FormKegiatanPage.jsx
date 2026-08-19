@@ -18,11 +18,13 @@ import {
   FiX,
   FiCheckSquare,
   FiCheck,
+  FiPrinter,
 } from 'solid-icons/fi';
 
 import { Badge } from '../components/ui/Badge';
 import { KategoriBadge } from '../components/common/KategoriBadge';
 import MasterPegawaiModal from '../components/layout/MasterPegawaiModal';
+import PrintPdfModal from '../components/layout/PrintPdfModal';
 import { STATUS_KEGIATAN, KATEGORI_LABEL, mapStatusToForm } from '../data/kegiatan.js';
 
 function CardHeader(props) {
@@ -130,8 +132,8 @@ export default function FormKegiatanPage() {
   const [pegawaiList, setPegawaiList] = createSignal([]);
   const [selectedPegawaiIds, setSelectedPegawaiIds] = createSignal([]);
   const [searchPegawai, setSearchPegawai] = createSignal('');
-  const [selectedDivisi, setSelectedDivisi] = createSignal('semua');
   const [pegawaiModalOpen, setPegawaiModalOpen] = createSignal(false);
+  const [printModalOpen, setPrintModalOpen] = createSignal(false);
 
   createEffect(() => {
     if (searchParams.openEmployeeManager === '1') {
@@ -145,8 +147,6 @@ export default function FormKegiatanPage() {
       const mapped = (data || []).map((p, idx) => ({
         id: p.id ?? `p${idx + 1}`,
         nama: p.nama ?? p.name ?? 'Unknown',
-        jabatan: p.jabatan ?? 'Staff',
-        divisi: p.divisi ?? 'Umum',
         profile: p.profile ?? p.avatar ?? p.photo ?? p.foto ?? null,
       }));
       setPegawaiList(mapped);
@@ -157,18 +157,8 @@ export default function FormKegiatanPage() {
 
   const onOpenEmployeeManager = () => setPegawaiModalOpen(true);
   const selectedEmployees = () => pegawaiList().filter((p) => selectedPegawaiIds().includes(p.id));
-  const divisiList = () => [...new Set(pegawaiList().map((p) => p.divisi))];
   const filteredPegawai = () =>
-    pegawaiList().filter((p) => {
-      const query = searchPegawai().toLowerCase();
-      const matchesQuery =
-        !query ||
-        p.nama.toLowerCase().includes(query) ||
-        p.jabatan.toLowerCase().includes(query) ||
-        p.divisi.toLowerCase().includes(query);
-      const matchesDivisi = selectedDivisi() === 'semua' || p.divisi === selectedDivisi();
-      return matchesQuery && matchesDivisi;
-    });
+    pegawaiList().filter((p) => !searchPegawai() || p.nama.toLowerCase().includes(searchPegawai().toLowerCase()));
 
   const handleTogglePegawai = (id) => {
     setSelectedPegawaiIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
@@ -222,17 +212,13 @@ export default function FormKegiatanPage() {
         }}
         pegawaiList={pegawaiList()}
         onRefresh={refreshPegawaiList}
-        onSelect={(id) => {
-          handleTogglePegawai(id);
-          setPegawaiModalOpen(false);
-          const currentQuery = new URLSearchParams(searchParams);
-          if (currentQuery.get('openEmployeeManager') === '1') {
-            currentQuery.delete('openEmployeeManager');
-            navigate(`/kegiatan/baru${currentQuery.toString() ? `?${currentQuery.toString()}` : ''}`, {
-              replace: true,
-            });
-          }
-        }}
+      />
+
+      <PrintPdfModal
+        open={printModalOpen()}
+        onClose={() => setPrintModalOpen(false)}
+        title='Cetak Formulir Kegiatan'
+        subtitle='Siapkan formulir kegiatan untuk dicetak atau disimpan dalam format PDF.'
       />
 
       <div class=':uno: animate-fade-in'>
@@ -546,7 +532,7 @@ export default function FormKegiatanPage() {
                           class=':uno: px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl text-[11px] font-bold transition-colors flex items-center space-x-1 cursor-pointer'
                         >
                           <FiCheckSquare class=':uno: w-3.5 h-3.5' />
-                          <span>Pilih Hasil ({filteredPegawai().length})</span>
+                          <span>Pilih Semua</span>
                         </button>
                       </div>
                     </div>
@@ -606,13 +592,6 @@ export default function FormKegiatanPage() {
                                 >
                                   {peg.nama}
                                 </span>
-                                <div class=':uno: flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5'>
-                                  <span className='truncate max-w-[130px]'>{peg.jabatan}</span>
-                                  <span>•</span>
-                                  <span className='px-1.5 py-0.2 rounded bg-slate-700 text-amber-300 font-semibold truncate max-w-[100px]'>
-                                    {peg.divisi}
-                                  </span>
-                                </div>
                               </div>
                             </div>
 
@@ -624,7 +603,7 @@ export default function FormKegiatanPage() {
                                 </span>
                               ) : (
                                 <span class=':uno: text-[10px] text-slate-500 border border-slate-700 px-2 py-0.5 rounded-lg'>
-                                  + Pilih
+                                  Belum
                                 </span>
                               )}
                             </div>
@@ -653,6 +632,14 @@ export default function FormKegiatanPage() {
                 >
                   <FiRotateCcw size={16} stroke-width={2} />
                   Reset Formulir
+                </button>
+                <button
+                  type='button'
+                  onClick={() => setPrintModalOpen(true)}
+                  class=':uno: flex items-center w-full justify-center font-bold rounded-full text-white gap-2 px-4 py-3 text-xs bg-slate-800 shadow-md shadow-slate-500/20'
+                >
+                  <FiPrinter size={16} stroke-width={2} />
+                  Cetak PDF
                 </button>
                 <button
                   type='submit'
@@ -843,13 +830,7 @@ export default function FormKegiatanPage() {
                               >
                                 {peg.nama}
                               </span>
-                              <div class=':uno: flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5'>
-                                <span className='truncate max-w-[130px]'>{peg.jabatan}</span>
-                                <span>•</span>
-                                <span className='px-1.5 py-0.2 rounded bg-slate-700 text-amber-300 font-semibold truncate max-w-[100px]'>
-                                  {peg.divisi}
-                                </span>
-                              </div>
+                              <div class=':uno: flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5'></div>
                             </div>
                           </div>
 

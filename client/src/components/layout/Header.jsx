@@ -84,11 +84,6 @@ export default function Header(props) {
           </div>
 
           <div class=':uno: h-5 w-px bg-[var(--border)] md:hidden' />
-
-          <button class=':uno: relative md:hidden rounded-md text-[var(--text-muted)] transition-colors ease-in duration-200 hover:(bg-[var(--surface-alt)] text-[var(--text)]/80) p-1'>
-            <FiBell size={24} stroke-width={2} />
-            <span class=':uno: absolute right-0.5 top-0.5 size-1.5 rounded-full bg-primary' />
-          </button>
         </div>
       </div>
     </header>

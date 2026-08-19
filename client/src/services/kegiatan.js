@@ -1,7 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL;
-
 export const getKegiatanAll = async () => {
-  const response = await fetch(`${API_URL}/kegiatan`, {
+  const response = await fetch('/api/kegiatan', {
     credentials: 'include',
   });
 
@@ -18,7 +16,7 @@ export const getKegiatanAll = async () => {
 }
 
 export const createKegiatan = async (payload) => {
-  const response = await fetch(`${API_URL}/kegiatan`, {
+  const response = await fetch(`/api/kegiatan`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -35,7 +33,7 @@ export const createKegiatan = async (payload) => {
 }
 
 export const updateKegiatan = async (id, payload) => {
-  const response = await fetch(`${API_URL}/kegiatan/${id}`, {
+  const response = await fetch(`/api/kegiatan/${id}`, {
     method: 'PUT',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -51,7 +49,7 @@ export const updateKegiatan = async (id, payload) => {
 }
 
 export const deleteKegiatan = async (id) => {
-  const response = await fetch(`${API_URL}/kegiatan/${id}`, {
+  const response = await fetch(`/api/kegiatan/${id}`, {
     method: 'DELETE',
     credentials: 'include',
   });

@@ -22,12 +22,14 @@ import { Badge } from '../components/ui/Badge';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  
+
   const [checkingAuth, setCheckingAuth] = createSignal(true);
 
-  {/* Forms */}
+  {
+    /* Forms */
+  }
   const [showPassword, setShowPassword] = createSignal(false);
-  
+
   const [username, setUsername] = createSignal('');
   const [password, setPassword] = createSignal('');
 
@@ -65,7 +67,7 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+      const response = await fetch(`/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,14 +128,12 @@ export default function LoginPage() {
                 />
                 <div>
                   <p aria-hidden='true' class=':uno: font-black text-2xl/5 tracking-wide text-[var(--title)]'>
-                    Kegiatan 
+                    Kegiatan
                   </p>
                   <p aria-hidden='true' class=':uno: font-bold text-xl text-[var(--title)]'>
                     Pegawai BPMPTP
                   </p>
-                  <p class=':uno: text-xs text-[var(--text)] font-semibold'>
-                    Pengelola kegiatan pegawai BPMPTP
-                  </p>
+                  <p class=':uno: text-xs text-[var(--text)] font-semibold'>Pengelola kegiatan pegawai BPMPTP</p>
                 </div>
               </div>
               <div class=':uno: space-y-4 mt-12'>

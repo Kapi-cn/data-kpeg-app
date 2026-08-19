@@ -171,9 +171,6 @@ export default function DetailModal(props) {
 
                         <div class=':uno: min-w-0'>
                           <p class=':uno: truncate text-xs font-bold text-slate-900'>{pegawai.nama || 'Pegawai'}</p>
-                          <p class=':uno: truncate text-[11px] text-slate-500'>
-                            {pegawai.jabatan || 'Staff'} • {pegawai.divisi || 'Umum'}
-                          </p>
                         </div>
                       </div>
                     )}

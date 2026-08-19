@@ -6,4 +6,12 @@ import UnoCSS from 'unocss/vite';
 
 export default defineConfig({
   plugins: [solid(), UnoCSS(), solidPlugin()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      }
+    }
+  }
 });

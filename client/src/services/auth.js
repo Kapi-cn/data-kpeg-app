@@ -1,7 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL;
-
 export const getCurrentUser = async () => {
-  const response = await fetch(`${API_URL}/auth/me`, {
+  const response = await fetch(`/api/auth/me`, {
     credentials: 'include',
   });
 
@@ -15,7 +13,7 @@ export const getCurrentUser = async () => {
 }
 
 export const logout = async () => {
-  const response = await fetch(`${API_URL}/auth/logout`, {
+  const response = await fetch(`/api/auth/logout`, {
     method: 'POST',
     credentials: 'include',
   });
