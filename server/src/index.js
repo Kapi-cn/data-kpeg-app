@@ -15,11 +15,6 @@ import pool from './config/database.js';
 
 const app = new Hono();
 
-if (process.env.NODE_ENV === 'production') {
-  app.use('../assets/*', serveStatic({ root: '../client/dist/assets' }));
-  app.use('*', serveStatic({ root: '../client/dist' }));
-}
-
 if (process.env.NODE_ENV === 'development') {
   app.use(
     '*',
@@ -31,12 +26,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 pool.getConnection()
-  .then((connection) => {
-    console.log('Database connected')
-    connection.release()
-  })
-  .catch((error) => {
-    console.error('Database connection failed:', error.message)
+.then((connection) => {
+  console.log('Database connected')
+  connection.release()
+})
+.catch((error) => {
+  console.error('Database connection failed:', error.message)
 });
 
 app.use('*', logger);
@@ -45,6 +40,17 @@ app.route('/api/auth', authRoute);
 app.route('/api/kegiatan', kegiatanRoute);
 app.route('/api/pegawai', pegawaiRoute);
 app.route('/api/dashboard', dashboardRoute);
+
+if (process.env.NODE_ENV === 'production') {
+  app.use('/assets/*', serveStatic({
+    root: '../client/dist',
+  }));
+
+  // SPA fallback
+  app.get('*', serveStatic({
+    path: '../client/dist/index.html',
+  }));
+}
 
 serve({
   fetch: app.fetch,
