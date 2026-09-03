@@ -1,19 +1,30 @@
 {
-  "name": "data-kpeg-app",
-  "version": "1.0.0",
-  "description": "Aplikasi pengelola data kegiatan pegawai BPMPTP",
-  "scripts": {
-    "build": "npm install --prefix ./client --include=dev && npm run build --prefix ./client && npm install --prefix ./server",
-    "start": "npm start --prefix ./server"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Kapi-cn/data-kpeg-app.git"
-  },
-  "keywords": [],
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/Kapi-cn/data-kpeg-app/issues"
-  },
-  "homepage": "https://github.com/Kapi-cn/data-kpeg-app#readme"
+	"name": "kpeg_bpmptp",
+	"version": "1.0.0",
+	"description": "",
+	"workspaces": [
+		"apps/*"
+	],
+	"scripts": {
+		"dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+		"dev:web": "npm --prefix apps/client run dev",
+		"dev:api": "npm --prefix apps/server run dev",
+
+		"build": "npm --prefix apps/client run build",
+		"start": "npm --prefix apps/server run start"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Kapi-cn/staffactivity.git"
+	},
+	"keywords": [],
+	"type": "commonjs",
+	"bugs": {
+		"url": "https://github.com/Kapi-cn/staffactivity/issues"
+	},
+	"homepage": "https://github.com/Kapi-cn/staffactivity#readme",
+	"devDependencies": {
+		"@biomejs/biome": "2.5.11",
+		"concurrently": "^10.0.5"
+	}
 }
