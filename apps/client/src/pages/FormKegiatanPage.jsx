@@ -39,7 +39,7 @@ import {
 function CardHeader(props) {
 	return (
 		<div class=":uno: layout-light flex items-center gap-3 py-3 border-b border-dashed border-[var(--border)]">
-			<div class=":uno: flex flex-shrink-0 items-center justify-center size-8 rounded-lg text-primary bg-primary/15">
+			<div class=":uno: flex flex-shrink-0 items-center justify-center size-8 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold">
 				{props.order}
 			</div>
 			<div class=":uno: space-y-1">
@@ -421,7 +421,7 @@ export default function FormKegiatanPage() {
 								type="button"
 								onClick={() => setFormType("pegawai")}
 								classList={{
-									"bg-orange-50 border-orange-500 text-orange-700":
+									"bg-indigo-50 border-indigo-300 text-indigo-700 shadow-sm":
 										formType() === "pegawai",
 								}}
 								class=":uno: text-left px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-bold cursor-pointer"
@@ -435,7 +435,7 @@ export default function FormKegiatanPage() {
 								type="button"
 								onClick={() => setFormType("balai")}
 								classList={{
-									"bg-orange-50 border-orange-500 text-orange-700":
+									"bg-indigo-50 border-indigo-300 text-indigo-700 shadow-sm":
 										formType() === "balai",
 								}}
 								class=":uno: text-left px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-bold cursor-pointer"
@@ -672,7 +672,7 @@ export default function FormKegiatanPage() {
 								</div>
 
 								{/* Card 4 (mobile): Pegawai - tampil hanya pada layar kecil */}
-								<div class=":uno: layout-dark mt-5 lg:hidden space-y-4">
+								<div class=":uno: hidden">
 									<div class=":uno: bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-800 space-y-5 relative overflow-hidden">
 										{/* Section Header */}
 										<div class=":uno: space-y-3 border-b border-slate-800 pb-4">
@@ -828,28 +828,17 @@ export default function FormKegiatanPage() {
 													</p>
 												</div>
 											) : (
-												filteredPegawai().map((peg, idx) => {
+												filteredPegawai().map((peg) => {
 													const isChecked = selectedPegawaiIds().includes(
 														peg.id,
 													);
-													// Avatar background gradients
-													const bgGradients = [
-														"from-amber-500 to-orange-500",
-														"from-emerald-500 to-teal-500",
-														"from-blue-500 to-indigo-500",
-														"from-purple-500 to-pink-500",
-														"from-rose-500 to-orange-500",
-													];
-													const gradient =
-														bgGradients[idx % bgGradients.length];
-
 													return (
 														<label
 															key={peg.id}
 															class={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
 																isChecked
-																	? "bg-gradient-to-r from-orange-950/70 via-slate-900 to-amber-950/50 border-orange-500/80 ring-1 ring-orange-500/50 shadow-md"
-																	: "bg-slate-800/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/90"
+																	? "bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200 shadow-sm"
+																	: "bg-white border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/30"
 															}`}
 														>
 															<div class=":uno: flex items-center space-x-3 overflow-hidden select-none pr-2">
@@ -857,11 +846,11 @@ export default function FormKegiatanPage() {
 																	type="checkbox"
 																	checked={isChecked}
 																	onChange={() => handleTogglePegawai(peg.id)}
-																	class=":uno: h-4 w-4 text-orange-500 rounded border-slate-600 bg-slate-900 focus:ring-orange-500 accent-orange-500 shrink-0 cursor-pointer"
+																	class=":uno: h-4 w-4 text-indigo-600 rounded border-slate-300 bg-white focus:ring-indigo-500 accent-indigo-600 shrink-0 cursor-pointer"
 																/>
 
 																<div
-																	class={`w-9 h-9 rounded-xl overflow-hidden ${peg.profile ? "" : `bg-gradient-to-tr ${gradient} text-white font-extrabold text-xs`} flex items-center justify-center shrink-0 shadow-md`}
+																	class={`w-8 h-8 rounded-full overflow-hidden ${peg.profile ? "" : "bg-slate-900 text-white font-extrabold text-xs"} flex items-center justify-center shrink-0`}
 																>
 																	{peg.profile ? (
 																		<img
@@ -870,7 +859,11 @@ export default function FormKegiatanPage() {
 																			class="w-full h-full object-cover"
 																		/>
 																	) : (
-																		peg.nama.charAt(0)
+																		String(peg.nama || "P")
+																			.trim()
+																			.split(/\s+/)[0]
+																			.slice(0, 2)
+																			.toUpperCase()
 																	)}
 																</div>
 
@@ -940,17 +933,17 @@ export default function FormKegiatanPage() {
 							</div>
 
 							{/* Card 4: Pegawai */}
-							<div class=":uno: layout-dark mt-5 lg:(col-span-5 sticky z-5 top-30) space-y-4 hidden lg:block">
-								<div class=":uno: bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-800 space-y-5 relative overflow-hidden">
+							<div class=":uno: employee-picker-card col-span-full mt-5 lg:(col-span-5 sticky z-5 top-30) space-y-4">
+								<div class=":uno: employee-picker-surface rounded-3xl p-6 sm:p-7 space-y-5 relative overflow-hidden">
 									{/* Section Header */}
-									<div class=":uno: space-y-3 border-b border-slate-800 pb-4">
+									<div class=":uno: space-y-3 border-b border-slate-200 pb-4">
 										<div class=":uno: flex items-center justify-between gap-2">
 											<div class=":uno: flex items-center space-x-3">
-												<div class=":uno: w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-black text-xs flex items-center justify-center shadow-lg shadow-orange-500/30 ring-2 ring-orange-500/20">
+												<div class=":uno: w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center justify-center">
 													04
 												</div>
 												<div>
-													<h2 class=":uno: text-sm font-medium text-white uppercase tracking-wider flex items-center space-x-1.5">
+													<h2 class=":uno: text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
 														<span>Pelaksana Kegiatan</span>
 													</h2>
 													<p class=":uno: text-[10px] text-slate-400">
@@ -959,7 +952,7 @@ export default function FormKegiatanPage() {
 												</div>
 											</div>
 
-											<span class=":uno: px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black text-xs rounded-full shadow-lg shadow-orange-500/30 shrink-0">
+											<span class=":uno: px-3.5 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 font-black text-xs rounded-full shrink-0">
 												{selectedPegawaiIds().length} Terpilih
 											</span>
 										</div>
@@ -969,9 +962,9 @@ export default function FormKegiatanPage() {
 												<button
 													type="button"
 													onClick={onOpenEmployeeManager}
-													class=":uno: text-xs text-amber-400 hover:text-amber-300 font-extrabold underline transition-colors cursor-pointer flex items-center space-x-1.5"
+													class=":uno: text-xs text-indigo-600 hover:text-indigo-800 font-extrabold underline transition-colors cursor-pointer flex items-center space-x-1.5"
 												>
-													<FiUserPlus class=":uno: w-3.5 h-3.5 text-orange-400" />
+													<FiUserPlus class=":uno: w-3.5 h-3.5 text-indigo-600" />
 													<span>Kelola / Tambah Master Pegawai</span>
 												</button>
 												<span class=":uno: text-[10px] text-slate-500">
@@ -983,9 +976,9 @@ export default function FormKegiatanPage() {
 
 									{/* Selected Employee Avatar Chips Tray */}
 									{selectedEmployees().length > 0 && (
-										<div class=":uno: p-3 bg-slate-800/80 rounded-2xl border border-slate-700/80 space-y-2">
-											<div class=":uno: flex items-center justify-between text-[11px] text-slate-300 font-extrabold">
-												<span class=":uno: flex items-center space-x-1 text-amber-300">
+										<div class=":uno: p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+											<div class=":uno: flex items-center justify-between text-[11px] text-slate-600 font-extrabold">
+												<span class=":uno: flex items-center space-x-1 text-indigo-600">
 													<FiUsers class=":uno: w-3.5 h-3.5" />
 													<span>
 														Anggota Tim Terpilih ({selectedEmployees().length})
@@ -1004,9 +997,9 @@ export default function FormKegiatanPage() {
 												{selectedEmployees().map((emp) => (
 													<span
 														key={emp.id}
-														class=":uno: inline-flex items-center space-x-1.5 px-2.5 py-1 bg-gradient-to-r from-orange-950 to-amber-950 text-amber-200 border border-orange-500/50 rounded-xl text-[11px] font-bold shadow-2xs"
+														class=":uno: inline-flex items-center space-x-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-[11px] font-bold"
 													>
-														<span class=":uno: w-4 h-4 rounded-full overflow-hidden bg-orange-500 text-white text-[9px] font-black flex items-center justify-center">
+														<span class=":uno: w-4 h-4 rounded-full overflow-hidden bg-slate-900 text-white text-[9px] font-black flex items-center justify-center">
 															{emp.profile ? (
 																<img
 																	src={emp.profile}
@@ -1014,7 +1007,11 @@ export default function FormKegiatanPage() {
 																	class="w-full h-full object-cover"
 																/>
 															) : (
-																emp.nama.charAt(0)
+																String(emp.nama || "P")
+																	.trim()
+																	.split(/\s+/)[0]
+																	.slice(0, 2)
+																	.toUpperCase()
 															)}
 														</span>
 														<span class=":uno: truncate max-w-[120px]">
@@ -1044,7 +1041,7 @@ export default function FormKegiatanPage() {
 												value={searchPegawai()}
 												onInput={(e) => setSearchPegawai(e.currentTarget.value)}
 												placeholder="Cari nama pegawai, NIP, atau jabatan..."
-												class=":uno: w-full pl-10 pr-8 py-2.5 text-xs bg-slate-800/90 border border-slate-700/80 rounded-2xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all font-medium"
+												class=":uno: w-full pl-10 pr-8 py-2.5 text-xs bg-white border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all font-medium"
 											/>
 											{searchPegawai() && (
 												<button
@@ -1058,10 +1055,10 @@ export default function FormKegiatanPage() {
 										</div>
 
 										{/* Quick Select All Toolbar */}
-										<div class=":uno: flex items-center justify-between gap-2 pt-1 text-xs border-t border-slate-800/80">
+										<div class=":uno: flex items-center justify-between gap-2 pt-1 text-xs border-t border-slate-200">
 											<span class=":uno: text-[11px] text-slate-400 font-medium">
 												Menampilkan{" "}
-												<strong class=":uno: text-amber-400">
+												<strong class=":uno: text-indigo-600">
 													{filteredPegawai().length}
 												</strong>{" "}
 												pegawai
@@ -1071,7 +1068,7 @@ export default function FormKegiatanPage() {
 												<button
 													type="button"
 													onClick={handleSelectAllPegawai}
-													class=":uno: px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl text-[11px] font-bold transition-colors flex items-center space-x-1 cursor-pointer"
+													class=":uno: px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl text-[11px] font-bold transition-colors flex items-center space-x-1 cursor-pointer"
 												>
 													<FiCheckSquare class=":uno: w-3.5 h-3.5" />
 													<span>Pilih Hasil ({filteredPegawai().length})</span>
@@ -1081,11 +1078,11 @@ export default function FormKegiatanPage() {
 									</div>
 
 									{/* Checkbox List for Employees with Avatar & Badges */}
-									<div class=":uno: max-h-[380px] overflow-y-auto pr-1 space-y-2.5 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
+									<div class=":uno: max-h-[380px] overflow-y-auto pr-1 space-y-2.5 scrollbar-thin">
 										{filteredPegawai().length === 0 ? (
-											<div class=":uno: py-12 text-center text-xs text-slate-400 bg-slate-800/40 rounded-2xl border border-slate-800/80 px-4 space-y-2">
-												<FiUsers class=":uno: w-8 h-8 text-slate-600 mx-auto" />
-												<p class=":uno: font-bold text-slate-300">
+											<div class=":uno: py-12 text-center text-xs text-slate-400 bg-slate-50 rounded-2xl border border-slate-200 px-4 space-y-2">
+												<FiUsers class=":uno: w-8 h-8 text-slate-300 mx-auto" />
+												<p class=":uno: font-bold text-slate-600">
 													Pegawai Tidak Ditemukan
 												</p>
 												<p class=":uno: text-[11px]">
@@ -1093,25 +1090,16 @@ export default function FormKegiatanPage() {
 												</p>
 											</div>
 										) : (
-											filteredPegawai().map((peg, idx) => {
+											filteredPegawai().map((peg) => {
 												const isChecked = selectedPegawaiIds().includes(peg.id);
-												// Avatar background gradients
-												const bgGradients = [
-													"from-amber-500 to-orange-500",
-													"from-emerald-500 to-teal-500",
-													"from-blue-500 to-indigo-500",
-													"from-purple-500 to-pink-500",
-													"from-rose-500 to-orange-500",
-												];
-												const gradient = bgGradients[idx % bgGradients.length];
 
 												return (
 													<label
 														key={peg.id}
 														class={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
 															isChecked
-																? "bg-gradient-to-r from-orange-950/70 via-slate-900 to-amber-950/50 border-orange-500/80 ring-1 ring-orange-500/50 shadow-md"
-																: "bg-slate-800/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/90"
+																? "bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200 shadow-sm"
+																: "bg-white border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/30"
 														}`}
 													>
 														<div class=":uno: flex items-center space-x-3 overflow-hidden select-none pr-2">
@@ -1119,11 +1107,11 @@ export default function FormKegiatanPage() {
 																type="checkbox"
 																checked={isChecked}
 																onChange={() => handleTogglePegawai(peg.id)}
-																class=":uno: h-4 w-4 text-orange-500 rounded border-slate-600 bg-slate-900 focus:ring-orange-500 accent-orange-500 shrink-0 cursor-pointer"
+																class=":uno: h-4 w-4 text-indigo-600 rounded border-slate-300 bg-white focus:ring-indigo-500 accent-indigo-600 shrink-0 cursor-pointer"
 															/>
 
 															<div
-																class={`w-9 h-9 rounded-xl overflow-hidden ${peg.profile ? "" : `bg-gradient-to-tr ${gradient} text-white font-extrabold text-xs`} flex items-center justify-center shrink-0 shadow-md`}
+																class={`w-8 h-8 rounded-full overflow-hidden ${peg.profile ? "" : "bg-slate-900 text-white font-extrabold text-xs"} flex items-center justify-center shrink-0`}
 															>
 																{peg.profile ? (
 																	<img
@@ -1132,14 +1120,16 @@ export default function FormKegiatanPage() {
 																		class="w-full h-full object-cover"
 																	/>
 																) : (
-																	peg.nama.charAt(0)
+																	String(peg.nama || "P")
+																		.trim()
+																		.split(/\s+/)[0]
+																		.slice(0, 2)
+																		.toUpperCase()
 																)}
 															</div>
 
 															<div class=":uno: min-w-0">
-																<span
-																	class={`text-xs font-bold block truncate ${isChecked ? "text-amber-300" : "text-slate-100"}`}
-																>
+																<span class="text-xs font-bold block truncate text-slate-900">
 																	{peg.nama}
 																</span>
 																<div class=":uno: flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5"></div>
@@ -1148,12 +1138,12 @@ export default function FormKegiatanPage() {
 
 														<div class=":uno: shrink-0 pl-2">
 															{isChecked ? (
-																<span class=":uno: inline-flex items-center space-x-1 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-xl shadow-xs">
+																<span class=":uno: inline-flex items-center space-x-1 bg-indigo-100 text-indigo-700 border border-indigo-200 text-[10px] font-black px-2.5 py-1 rounded-xl shadow-none">
 																	<FiCheck class=":uno: w-3 h-3" />
 																	<span>Terpilih</span>
 																</span>
 															) : (
-																<span class=":uno: text-[10px] text-slate-500 border border-slate-700 px-2 py-0.5 rounded-lg">
+																<span class=":uno: text-[10px] text-slate-500 border border-slate-200 px-2 py-0.5 rounded-lg">
 																	+ Pilih
 																</span>
 															)}
@@ -1165,9 +1155,9 @@ export default function FormKegiatanPage() {
 									</div>
 
 									{/* Selection Summary Footer */}
-									<div class=":uno: pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+									<div class=":uno: pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
 										<span>Total Pelaksana Kegiatan:</span>
-										<span class=":uno: font-black text-amber-400 text-sm bg-slate-800 px-3 py-1 rounded-xl border border-slate-700">
+										<span class=":uno: font-black text-indigo-700 text-sm bg-indigo-50 px-3 py-1 rounded-xl border border-indigo-200">
 											{selectedPegawaiIds().length} Orang
 										</span>
 									</div>

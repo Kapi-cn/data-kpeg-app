@@ -173,7 +173,7 @@ export default function ListKegiatanPage() {
 							</div>
 						</div>
 
-						<div class=":uno: grid grid-cols-2 gap-3 w-full lg:max-w-sm">
+						<div class=":uno: grid lg:grid-cols-2 gap-3 w-full lg:max-w-sm">
 							<button
 								type="button"
 								onClick={() => {

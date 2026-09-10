@@ -261,22 +261,22 @@ export default function PrintPdfModal(props) {
 					class=":uno: layout-light relative w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20"
 					onClick={(e) => e.stopPropagation()}
 				>
-					<div class=":uno: flex items-start justify-between bg-gradient-to-r from-slate-900 via-slate-800 to-orange-900 px-6 py-5 text-white">
+					<div class=":uno: flex items-start justify-between border-b border-slate-200 bg-white px-6 py-5">
 						<div class=":uno: pr-4">
 							<div class=":uno: mb-2 flex items-center gap-2">
-								<span class=":uno: inline-flex items-center rounded-full border border-white/30 bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white">
+								<span class=":uno: inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-indigo-700">
 									Export Dokumen
 								</span>
 							</div>
 
-							<h3 class=":uno: text-xl font-bold text-white leading-snug">
+							<h3 class=":uno: text-xl font-bold leading-snug text-slate-900">
 								{props.title || "Cetak Laporan PDF"}
 							</h3>
 						</div>
 
 						<button
 							type="button"
-							class=":uno: rounded-xl p-1.5 text-white transition-colors hover:bg-white/10"
+							class=":uno: rounded-xl p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
 							onClick={props.onClose}
 							aria-label="Tutup modal cetak"
 						>
@@ -285,7 +285,7 @@ export default function PrintPdfModal(props) {
 					</div>
 
 					<div class=":uno: space-y-5 p-6">
-						<div class=":uno: rounded-2xl border border-orange-100 bg-orange-50/60 p-4">
+						<div class=":uno: rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
 							<p class=":uno: text-xs font-semibold text-slate-600">
 								{props.subtitle ||
 									"Siapkan dokumen kegiatan untuk dicetak atau diekspor ke format PDF."}
@@ -297,7 +297,7 @@ export default function PrintPdfModal(props) {
 								Filter Bulan Kegiatan
 							</label>
 							<div class=":uno: relative">
-								<span class=":uno: absolute inset-y-0 left-0 flex items-center pl-3 text-orange-500">
+								<span class=":uno: absolute inset-y-0 left-0 flex items-center pl-3 text-indigo-600">
 									<FiCalendar size={14} />
 								</span>
 								<input
@@ -311,7 +311,7 @@ export default function PrintPdfModal(props) {
 
 						<div class=":uno: grid gap-3 sm:grid-cols-2">
 							<div class=":uno: rounded-2xl border border-slate-200 bg-slate-50 p-4">
-								<div class=":uno: mb-3 flex size-10 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
+								<div class=":uno: mb-3 flex size-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200">
 									<FiFileText size={18} />
 								</div>
 								<p class=":uno: text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
@@ -363,7 +363,7 @@ export default function PrintPdfModal(props) {
 
 						<button
 							type="button"
-							class=":uno: inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 text-[11px] font-black text-white shadow-md shadow-orange-500/30 transition-colors hover:brightness-105"
+							class=":uno: inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-[11px] font-black text-white shadow-sm shadow-indigo-600/20 transition-colors hover:bg-indigo-700"
 							onClick={handlePrint}
 						>
 							<FiPrinter size={14} />

@@ -46,6 +46,12 @@ aside.layout-light .ring-orange-500\/30 {
 	--un-ring-color: rgb(79 70 229 / 30%);
 }
 
+.employee-picker-surface {
+	background: #fff;
+	border: 1px solid #e4e7ec;
+	box-shadow: 0 1px 2px rgb(16 24 40 / 4%);
+}
+
 .dashboard-shell {
 	max-width: 1280px;
 	margin: 0 auto;

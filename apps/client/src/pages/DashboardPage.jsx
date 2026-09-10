@@ -208,7 +208,7 @@ export default function DashboardPage() {
 						instansi.
 					</p>
 				</div>
-				<div class="dashboard-controls">
+				<div class="grid lg:grid-cols-2 gap-3 w-full lg:max-w-sm">
 					<label class="select-control">
 						<FiLayers size={15} />
 						<select
