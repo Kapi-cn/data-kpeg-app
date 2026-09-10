@@ -24,6 +24,11 @@ const badgeColor = {
 		text: "text-yellow-500",
 		ring: "ring-yellow-400",
 	},
+	indigo: {
+		bg: "bg-indigo-500/20",
+		text: "text-indigo-500",
+		ring: "ring-indigo-400",
+	},
 };
 
 const badgeSize = {

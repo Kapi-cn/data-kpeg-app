@@ -112,7 +112,7 @@ export default function LoginPage() {
 									height={32}
 									alt=""
 									aria-hidden="true"
-									class=":uno: rounded-lg shadow-sm shadow-primary size-12 p-1"
+									class=":uno: size-12 p-1"
 								/>
 								<div>
 									<p

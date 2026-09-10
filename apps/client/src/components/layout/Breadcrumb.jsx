@@ -21,7 +21,7 @@ export default function Breadcrumb() {
 					<A
 						href="/"
 						class=":uno: text-sm flex items-center gap-2 tracking-wide"
-						activeClass=":uno: text-primary/90 font-medium"
+						activeClass=":uno: text-[#4f46e5] font-medium"
 						end={true}
 					>
 						<FiHome size={16} stroke-width={2} />
@@ -36,7 +36,7 @@ export default function Breadcrumb() {
 						<A
 							href={location.pathname}
 							class=":uno: text-sm flex items-center gap-2 tracking-wide"
-							activeClass=":uno: text-primary/90 font-medium"
+							activeClass=":uno: text-[#4f46e5] font-medium"
 							end={true}
 						>
 							<Show when={segments().at(-1) === "kegiatan"}>

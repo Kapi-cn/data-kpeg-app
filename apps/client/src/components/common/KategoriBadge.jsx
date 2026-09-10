@@ -1,19 +1,19 @@
 const KATEGORI_KEGIATAN = {
 	DLT: {
 		label: "DLT",
-		bg: "bg-blue-600",
+		style: "bg-blue-50 text-blue-700 border-blue-200",
 	},
 	TN: {
 		label: "TN",
-		bg: "bg-purple-600",
+		style: "bg-violet-50 text-violet-700 border-violet-200",
 	},
 	DP: {
 		label: "DP",
-		bg: "bg-orange-600",
+		style: "bg-amber-50 text-amber-700 border-amber-200",
 	},
 	DLK: {
 		label: "DLK",
-		bg: "bg-emerald-600",
+		style: "bg-emerald-50 text-emerald-700 border-emerald-200",
 	},
 };
 
@@ -22,7 +22,7 @@ export function KategoriBadge(props) {
 
 	return (
 		<div
-			class={`:uno: rounded-lg inline px-2 py-0.5 font-semibold text-xs ${badge.bg} text-white`}
+			class={`:uno: inline rounded-md border px-2 py-0.5 text-xs font-bold ${badge.style}`}
 		>
 			{badge.label}
 		</div>

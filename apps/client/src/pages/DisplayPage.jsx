@@ -34,6 +34,7 @@ const MONTH_NAMES = [
 	"Desember",
 ];
 const CATEGORIES = ["DLK", "DP", "TN", "DLT"];
+const TAB_ROTATION_INTERVAL = 16000;
 const getMonth = (value) => {
 	const date = new Date(value);
 	return Number.isNaN(date.getTime())
@@ -52,6 +53,28 @@ export default function DisplayPage() {
 	const [search, setSearch] = createSignal("");
 	const [activeOnly, setActiveOnly] = createSignal(false);
 	const [currentTime, setCurrentTime] = createSignal(new Date());
+	const [slideDirection, setSlideDirection] = createSignal("");
+	const changeTab = (nextTab) => {
+		if (nextTab === activeTab()) return;
+		setSlideDirection(nextTab === "pegawai" ? "to-pegawai" : "to-agenda");
+		setActiveTab(nextTab);
+	};
+	const agendaPanelClass = () =>
+		activeTab() === "agenda"
+			? slideDirection() === "to-agenda"
+				? "carousel-slide-in-left"
+				: "carousel-slide-active"
+			: slideDirection() === "to-pegawai"
+				? "carousel-slide-out-left"
+				: "carousel-slide-off-left";
+	const pegawaiPanelClass = () =>
+		activeTab() === "pegawai"
+			? slideDirection() === "to-pegawai"
+				? "carousel-slide-in-right"
+				: "carousel-slide-active"
+			: slideDirection() === "to-agenda"
+				? "carousel-slide-out-right"
+				: "carousel-slide-off-right";
 	const allKegiatan = () =>
 		Array.isArray(kegiatanData()) ? kegiatanData() : [];
 	const allPegawai = () => (Array.isArray(pegawaiData()) ? pegawaiData() : []);
@@ -160,8 +183,8 @@ export default function DisplayPage() {
 		const handleKeyDown = (event) => {
 			if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target?.tagName))
 				return;
-			if (event.key === "ArrowLeft") setActiveTab("agenda");
-			if (event.key === "ArrowRight") setActiveTab("pegawai");
+			if (event.key === "ArrowLeft") changeTab("agenda");
+			if (event.key === "ArrowRight") changeTab("pegawai");
 		};
 		window.addEventListener("keydown", handleKeyDown);
 		return () => {
@@ -169,27 +192,32 @@ export default function DisplayPage() {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
 	});
+	createEffect(() => {
+		if (search().trim()) return;
+		const tabRotation = window.setInterval(() => {
+			changeTab(activeTab() === "agenda" ? "pegawai" : "agenda");
+		}, TAB_ROTATION_INTERVAL);
+		return () => window.clearInterval(tabRotation);
+	});
 	return (
 		<div class=":uno: space-y-6 animate-fade-in pb-12">
-			<div class=":uno: bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs flex flex-col lg:(flex-row items-center justify-between) gap-4">
+			<div class=":uno: dashboard-header">
 				<div>
-					<h1 class=":uno: text-xl font-bold text-slate-900 flex items-center gap-2">
-						Display Kegiatan{" "}
-						<span class=":uno: text-xs px-2.5 py-1 rounded-full bg-orange-100 text-orange-800">
-							{monthLabel()}
-						</span>
-					</h1>
-					<p class=":uno: text-xs text-slate-500 mt-1">
+					<div class=":uno: dashboard-kicker">
+						<FiCalendar size={14} /> LIVE DISPLAY
+					</div>
+					<h1>Display Kegiatan</h1>
+					<p>
 						Rekapitulasi agenda resmi instansi balai dan partisipasi kegiatan
 						pegawai.
 					</p>
 				</div>
-				<div class=":uno: flex flex-wrap items-center gap-2">
+				<div class=":uno: dashboard-controls">
 					<input
 						type="month"
 						value={selectedMonth()}
 						onInput={(event) => setSelectedMonth(event.currentTarget.value)}
-						class=":uno: px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-semibold cursor-pointer"
+						class=":uno: select-control"
 						title="Pilih bulan"
 					/>
 				</div>
@@ -219,14 +247,14 @@ export default function DisplayPage() {
 					<div class=":uno: flex items-center bg-slate-200/70 p-1 rounded-xl w-full sm:w-auto">
 						<Tab
 							active={activeTab() === "agenda"}
-							onClick={() => setActiveTab("agenda")}
+							onClick={() => changeTab("agenda")}
 							icon={<FiCalendar size={14} />}
 							label="Agenda Balai"
 							count={agendaBalai().length}
 						/>
 						<Tab
 							active={activeTab() === "pegawai"}
-							onClick={() => setActiveTab("pegawai")}
+							onClick={() => changeTab("pegawai")}
 							icon={<FiUsers size={14} />}
 							label="Summary Pegawai"
 							count={employees().length}
@@ -264,12 +292,14 @@ export default function DisplayPage() {
 						</div>
 					}
 				>
-					<Show
-						when={activeTab() === "agenda"}
-						fallback={<EmployeeTable rows={employees()} />}
-					>
-						<AgendaTable rows={agendaBalai()} />
-					</Show>
+					<div class=":uno: display-carousel">
+						<div class={`:uno: display-carousel-panel ${agendaPanelClass()}`}>
+							<AgendaTable rows={agendaBalai()} />
+						</div>
+						<div class={`:uno: display-carousel-panel ${pegawaiPanelClass()}`}>
+							<EmployeeTable rows={employees()} />
+						</div>
+					</div>
 				</Show>
 				<div class=":uno: p-3 bg-slate-50/60 border-t border-slate-200 flex items-center gap-1.5 text-[11px] text-slate-500">
 					<FiInfo size={14} />

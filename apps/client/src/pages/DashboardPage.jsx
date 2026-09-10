@@ -1,488 +1,570 @@
-import { createMemo, createResource } from "solid-js";
+import { createMemo, createResource, createSignal, For, Show } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-
 import {
-	FiBriefcase,
+	FiActivity,
+	FiArrowUpRight,
 	FiCalendar,
+	FiCheckCircle,
+	FiChevronDown,
+	FiClock,
+	FiLayers,
 	FiPlus,
-	FiMenu,
-	FiUser,
+	FiUsers,
 } from "solid-icons/fi";
-
 import { getKegiatanAll } from "../services/kegiatan.js";
 import { getPegawai } from "../services/pegawai.js";
 
-const CATEGORY_LABELS = {
-	DLT: { bg: "bg-orange-100", text: "text-orange-700", full: "Dinas Luar Tim" },
-	TN: { bg: "bg-violet-100", text: "text-violet-700", full: "Tugas Narsum" },
-	DP: {
-		bg: "bg-emerald-100",
-		text: "text-emerald-700",
-		full: "Dalam Penugasan",
-	},
-	DLK: {
-		bg: "bg-cyan-100",
-		text: "text-cyan-700",
-		full: "Dinas Luar Kegiatan",
-	},
-	Lainnya: { bg: "bg-slate-100", text: "text-slate-700", full: "Lainnya" },
+const CATEGORY_INFO = {
+	DLT: { color: "#4f46e5" },
+	TN: { color: "#6366f1" },
+	DP: { color: "#818cf8" },
+	DLK: { color: "#a5b4fc" },
 };
-
-const STATUS_LABELS = {
-	Rencana: { bg: "border-blue-200 bg-blue-50", dot: "bg-blue-500" },
-	Berlangsung: { bg: "border-amber-200 bg-amber-50", dot: "bg-amber-500" },
-	Selesai: { bg: "border-emerald-200 bg-emerald-50", dot: "bg-emerald-500" },
-	Dibatalkan: { bg: "border-rose-200 bg-rose-50", dot: "bg-rose-500" },
+const CATEGORY_KEYS = ["DLT", "TN", "DP", "DLK"];
+const STATUS_KEYS = ["Selesai", "Berlangsung", "Rencana", "Dibatalkan"];
+const STATUS_COLORS = {
+	Selesai: "#4f46e5",
+	Berlangsung: "#6366f1",
+	Rencana: "#a5b4fc",
+	Dibatalkan: "#c7d2fe",
 };
-
-const normalizeStatus = (status) => {
-	const statusValue = String(status || "")
+const MONTHS = [
+	"Jan",
+	"Feb",
+	"Mar",
+	"Apr",
+	"Mei",
+	"Jun",
+	"Jul",
+	"Agu",
+	"Sep",
+	"Okt",
+	"Nov",
+	"Des",
+];
+const normalizeStatus = (value) => {
+	const status = String(value || "")
 		.trim()
 		.toLowerCase();
-	if (!statusValue) return "Rencana";
-
-	const map = {
-		rencana: "Rencana",
-		terjadwal: "Rencana",
-		berlangsung: "Berlangsung",
-		selesai: "Selesai",
-		dibatalkan: "Dibatalkan",
-	};
-
-	return map[statusValue] || status;
+	if (status === "selesai") return "Selesai";
+	if (status === "berlangsung") return "Berlangsung";
+	if (status === "dibatalkan") return "Dibatalkan";
+	return "Rencana";
 };
-
-const normalizeCategory = (category) => {
-	const value = String(category || "")
+const normalizeCategory = (value) => {
+	const category = String(value || "")
 		.trim()
 		.toUpperCase();
-	if (!value) return "Lainnya";
-	return ["DLT", "TN", "DP", "DLK"].includes(value) ? value : "Lainnya";
+	return CATEGORY_KEYS.includes(category) ? category : "DLT";
 };
-
-const getPercent = (value, total) => {
-	if (!total) return 0;
-	return Math.round((value / total) * 100);
-};
-
-const formatDate = (value) => {
-	if (!value) return "-";
-
+const dateValue = (value) => {
 	const date = new Date(value);
-	if (Number.isNaN(date.getTime())) return "-";
-
-	return date.toLocaleDateString("id-ID", {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-	});
+	return Number.isNaN(date.getTime()) ? null : date;
 };
+const durationHours = (item) => {
+	const start = dateValue(item.waktu_mulai);
+	const end = dateValue(item.waktu_selesai);
+	return start && end ? Math.max(0, (end - start) / 3600000) : 0;
+};
+const formatNumber = (value) =>
+	new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 }).format(value);
 
 export default function DashboardPage() {
 	const navigate = useNavigate();
 	const [kegiatanData] = createResource(getKegiatanAll);
 	const [pegawaiData] = createResource(getPegawai);
-
+	const [period, setPeriod] = createSignal("all");
 	const allKegiatan = () => {
 		const value = kegiatanData();
-
-		if (Array.isArray(value)) return value;
-		if (value && Array.isArray(value.data)) return value.data;
-
-		return [];
+		return Array.isArray(value)
+			? value
+			: Array.isArray(value?.data)
+				? value.data
+				: [];
 	};
-
 	const allPegawai = () => {
 		const value = pegawaiData();
-
-		if (Array.isArray(value)) return value;
-		if (value && Array.isArray(value.data)) return value.data;
-
-		return [];
+		return Array.isArray(value)
+			? value
+			: Array.isArray(value?.data)
+				? value.data
+				: [];
 	};
-
-	const totalKegiatan = () => allKegiatan().length;
-	const totalPegawai = () => allPegawai().length;
-	const totalDivisi = () => {
-		const uniqueDivisi = new Set();
-
-		for (const pegawai of allPegawai()) {
-			const divisi = pegawai.divisi || pegawai.unit || "Umum";
-			uniqueDivisi.add(divisi);
-		}
-
-		return uniqueDivisi.size;
-	};
-
-	const statusSummary = () => {
-		const summary = {
-			Rencana: 0,
-			Berlangsung: 0,
-			Selesai: 0,
-			Dibatalkan: 0,
-		};
-
-		for (const item of allKegiatan()) {
-			const status = String(item.status || "")
-				.trim()
-				.toLowerCase();
-
-			if (status === "terjadwal" || status === "rencana") {
-				summary.Rencana += 1;
-			} else if (status === "berlangsung") {
-				summary.Berlangsung += 1;
-			} else if (status === "selesai") {
-				summary.Selesai += 1;
-			} else if (status === "dibatalkan") {
-				summary.Dibatalkan += 1;
-			}
-		}
-
-		const total = totalKegiatan();
-
-		return {
-			Rencana: {
-				count: summary.Rencana,
-				pct: getPercent(summary.Rencana, total),
-			},
-			Berlangsung: {
-				count: summary.Berlangsung,
-				pct: getPercent(summary.Berlangsung, total),
-			},
-			Selesai: {
-				count: summary.Selesai,
-				pct: getPercent(summary.Selesai, total),
-			},
-			Dibatalkan: {
-				count: summary.Dibatalkan,
-				pct: getPercent(summary.Dibatalkan, total),
-			},
-		};
-	};
-
-	const categoryStats = () => {
-		const stats = {};
-
-		for (const item of allKegiatan()) {
-			const key = normalizeCategory(item.kategori);
-			if (!(key in stats)) stats[key] = 0;
-			stats[key] += 1;
-		}
-
-		const total = totalKegiatan();
-		return ["DLT", "TN", "DP", "DLK"].map((key) => {
-			const count = stats[key] || 0;
+	const filteredKegiatan = createMemo(() => {
+		const now = new Date();
+		return allKegiatan().filter((item) => {
+			const date = dateValue(item.waktu_mulai);
+			if (!date || period() === "all") return period() === "all";
+			if (period() === "7") return (now - date) / 86400000 <= 7 && date <= now;
+			if (period() === "30")
+				return (now - date) / 86400000 <= 30 && date <= now;
+			return date.getFullYear() === now.getFullYear();
+		});
+	});
+	const totalHours = createMemo(() =>
+		filteredKegiatan().reduce((sum, item) => sum + durationHours(item), 0),
+	);
+	const completedCount = createMemo(
+		() =>
+			filteredKegiatan().filter(
+				(item) => normalizeStatus(item.status) === "Selesai",
+			).length,
+	);
+	const activePeople = createMemo(() => {
+		const ids = new Set();
+		filteredKegiatan().forEach((item) => {
+			(item.pegawai || []).forEach((person) => {
+				ids.add(Number(person.id));
+			});
+		});
+		return ids.size;
+	});
+	const completionRate = createMemo(() =>
+		filteredKegiatan().length
+			? Math.round((completedCount() / filteredKegiatan().length) * 100)
+			: 0,
+	);
+	const monthlyTrend = createMemo(() => {
+		const now = new Date();
+		const months = Array.from({ length: 6 }, (_, index) => {
+			const date = new Date(now.getFullYear(), now.getMonth() - 5 + index, 1);
 			return {
-				key,
-				count,
-				pct: getPercent(count, total),
-				meta: CATEGORY_LABELS[key] || CATEGORY_LABELS.Lainnya,
+				year: date.getFullYear(),
+				month: date.getMonth(),
+				label: MONTHS[date.getMonth()],
+				count: 0,
 			};
 		});
-	};
-
-	const recentActivities = () => {
-		return [...allKegiatan()]
-			.sort(
-				(a, b) =>
-					new Date(b.waktu_mulai || b.waktu_selesai) -
-					new Date(a.waktu_mulai || a.waktu_selesai),
-			)
-			.slice(0, 5)
-			.map((item) => ({
-				id: item.id,
-				kategori: normalizeCategory(item.kategori),
-				status: normalizeStatus(item.status),
-				namaKegiatan: item.nama_kegiatan,
-				tanggalMulai: formatDate(item.waktu_mulai),
-				pegawaiIds: Array.isArray(item.pegawai) ? item.pegawai : [],
-			}));
-	};
-
-	const stats = createMemo(statusSummary);
-	const totalAgenda = createMemo(totalKegiatan);
-
-	const handleOpenEmployeeManager = () => navigate("/kegiatan");
-	const handleSelectTab = (tab) => {
-		if (tab === "list") navigate("/kegiatan");
-		if (tab === "new") navigate("/kegiatan/baru");
-	};
-	const handleViewDetail = (item) => {
-		console.log("View detail activity", item);
-	};
+		filteredKegiatan().forEach((item) => {
+			const date = dateValue(item.waktu_mulai);
+			const month = months.find(
+				(entry) =>
+					entry.year === date?.getFullYear() &&
+					entry.month === date?.getMonth(),
+			);
+			if (month) month.count += 1;
+		});
+		return months;
+	});
+	const categoryStats = createMemo(() =>
+		CATEGORY_KEYS.map((key) => ({
+			key,
+			count: filteredKegiatan().filter(
+				(item) => normalizeCategory(item.kategori) === key,
+			).length,
+			...CATEGORY_INFO[key],
+		})),
+	);
+	const statusStats = createMemo(() =>
+		STATUS_KEYS.map((key) => ({
+			key,
+			count: filteredKegiatan().filter(
+				(item) => normalizeStatus(item.status) === key,
+			).length,
+			color: STATUS_COLORS[key],
+		})),
+	);
+	const locationStats = createMemo(() => {
+		const locations = new Map();
+		filteredKegiatan().forEach((item) => {
+			const location =
+				String(item.lokasi || "Tanpa lokasi").trim() || "Tanpa lokasi";
+			locations.set(location, (locations.get(location) || 0) + 1);
+		});
+		return [...locations.entries()]
+			.map(([label, count]) => ({ label, count }))
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 5);
+	});
+	const employeeStats = createMemo(() =>
+		allPegawai()
+			.map((employee) => {
+				const activities = filteredKegiatan().filter((item) =>
+					(item.pegawai || []).some(
+						(person) => Number(person.id) === Number(employee.id),
+					),
+				);
+				return {
+					employee,
+					count: activities.length,
+					hours: activities.reduce((sum, item) => sum + durationHours(item), 0),
+				};
+			})
+			.filter((item) => item.count)
+			.sort((a, b) => b.hours - a.hours)
+			.slice(0, 4),
+	);
 
 	return (
-		<div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 space-y-6 animate-fade-in">
-			<div class="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-				<div class="space-y-2">
-					<h1 class="text-xl/6 font-extrabold text-pretty text-slate-900 tracking-tight">
-						Statistika & Pemantauan Kegiatan Dinas
-					</h1>
-					<p class="text-xs text-slate-500 font-medium">
-						Gambaran umum data kegiatan pegawai, status progres, dan distribusi
-						kategori secara langsung.
+		<div class="dashboard-shell animate-fade-in">
+			<header class="dashboard-header">
+				<div>
+					<div class="dashboard-kicker">
+						<FiActivity size={14} /> DATA ANALYTICS
+					</div>
+					<h1>Dashboard Analisis Kegiatan</h1>
+					<p>
+						Visualisasi produktivitas dan pemantauan realisasi tugas pegawai
+						instansi.
 					</p>
 				</div>
-
-				<div class="flex flex-wrap items-center gap-2.5">
+				<div class="dashboard-controls">
+					<label class="select-control">
+						<FiLayers size={15} />
+						<select
+							value={period()}
+							onChange={(event) => setPeriod(event.currentTarget.value)}
+						>
+							<option value="all">Semua Data</option>
+							<option value="365">Tahun Ini</option>
+							<option value="30">30 Hari</option>
+							<option value="7">7 Hari</option>
+						</select>
+						<FiChevronDown size={14} />
+					</label>
 					<button
+						class="outline-action"
 						type="button"
-						onClick={() => handleSelectTab("new")}
-						class="px-4 py-2.5 bg-orange-400 text-white font-black text-xs rounded-2xl shadow-md shadow-orange-500/20 transition-all flex items-center space-x-2 cursor-pointer"
+						onClick={() => navigate("/kegiatan/baru")}
 					>
-						<FiPlus size={16} stroke-width={3} />
-						<span>Input Kegiatan</span>
-					</button>
-
-					<button
-						type="button"
-						onClick={() => handleSelectTab("list")}
-						class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-2xl transition-all flex items-center space-x-2 cursor-pointer"
-					>
-						<FiMenu size={16} stroke-width={3} />
-						<span>Lihat Semua</span>
+						<FiPlus size={15} /> Kegiatan Baru
 					</button>
 				</div>
-			</div>
+			</header>
+			<Show
+				when={!kegiatanData.loading && !pegawaiData.loading}
+				fallback={<DashboardLoading />}
+			>
+				<section class=":uno: mt-4 gap-2 grid grid-cols-2 lg:grid-cols-4">
+					<MetricCard
+						label="Total Kegiatan"
+						value={filteredKegiatan().length}
+						suffix="kegiatan"
+						detail="Tercatat dalam periode ini"
+						icon={<FiCalendar />}
+					/>
+					<MetricCard
+						label="Total Jam Kerja"
+						value={formatNumber(totalHours())}
+						suffix="jam kerja"
+						detail={`${formatNumber(filteredKegiatan().length ? totalHours() / filteredKegiatan().length : 0)} jam per aktivitas`}
+						icon={<FiClock />}
+					/>
+					<MetricCard
+						label="Tingkat Selesai"
+						value={`${completionRate()}%`}
+						suffix={`(${completedCount()}/${filteredKegiatan().length})`}
+						detail="Aktivitas berstatus selesai"
+						icon={<FiCheckCircle />}
+						progress={completionRate()}
+					/>
+					<MetricCard
+						label="Pegawai Terlibat"
+						value={activePeople()}
+						suffix="aparatur aktif"
+						detail={`Tersebar di ${locationStats().length || 1} lokasi kegiatan`}
+						icon={<FiUsers />}
+					/>
+				</section>
+				<section class="dashboard-grid dashboard-grid-main">
+					<Panel
+						title="Tren Dinamika Kegiatan"
+						subtitle="Pemantauan volume aktivitas dalam 6 bulan terakhir"
+						tag="Volume aktivitas"
+					>
+						<TrendChart data={monthlyTrend()} />
+					</Panel>
+					<Panel
+						title="Kategori Kegiatan"
+						subtitle="Komposisi jenis tugas yang dikerjakan pegawai"
+						tag="Distribusi"
+					>
+						<CategoryChart
+							data={categoryStats()}
+							total={filteredKegiatan().length}
+						/>
+					</Panel>
+				</section>
+				<section class="dashboard-grid dashboard-grid-secondary">
+					<Panel
+						title="Kegiatan Berdasarkan Lokasi"
+						subtitle="Lokasi dengan jumlah kegiatan terbanyak dalam periode analisis"
+						tag={`${locationStats().length} lokasi`}
+					>
+						<LocationChart data={locationStats()} />
+					</Panel>
+					<Panel
+						title="Status Pelaksanaan"
+						subtitle="Distribusi status penyelesaian kegiatan"
+						tag="Realisasi"
+					>
+						<StatusChart
+							data={statusStats()}
+							total={filteredKegiatan().length}
+							onDetail={() => navigate("/kegiatan")}
+						/>
+					</Panel>
+				</section>
+				<section class="dashboard-grid dashboard-grid-bottom">
+					<Panel
+						title="Pegawai dengan Kontribusi Kegiatan Terbanyak"
+						subtitle="Berdasarkan akumulasi jam kerja dan pelaporan tugas"
+						tag="Top 4 Aparatur"
+					>
+						<EmployeeRanking data={employeeStats()} />
+					</Panel>
+					<div class="quick-panel">
+						<div class="quick-icon">
+							<FiActivity size={20} />
+						</div>
+						<h2>Ingin Mencatat Kegiatan Baru?</h2>
+						<p>
+							Catat log pekerjaan harian, durasi, hasil capaian, dan dokumen
+							pendukung untuk evaluasi kinerja terpadu.
+						</p>
+						<button
+							type="button"
+							class="primary-action"
+							onClick={() => navigate("/kegiatan/baru")}
+						>
+							<FiPlus size={15} /> Buat Entri Kegiatan Baru
+						</button>
+						<button
+							type="button"
+							class="secondary-action"
+							onClick={() => navigate("/kegiatan")}
+						>
+							Buka Semua Data Kegiatan <FiArrowUpRight size={14} />
+						</button>
+					</div>
+				</section>
+			</Show>
+		</div>
+	);
+}
 
-			<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-				<div class="lg:col-span-7 space-y-6">
-					<div class="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm space-y-4">
-						<div class="flex items-center justify-between border-b border-slate-100 pb-3">
-							<div class="flex items-center space-x-2">
-								<div class="p-2 bg-orange-50 text-orange-600 rounded-xl">
-									<span>◉</span>
-								</div>
-								<div>
-									<h2 class="text-sm font-medium text-slate-900 uppercase tracking-wide">
-										Statistika Status Progres
-									</h2>
-									<p class="text-[11px] text-slate-500">
-										Proporsi progres kegiatan secara keseluruhan
-									</p>
-								</div>
-							</div>
-							<span class="text-xs font-extrabold text-slate-700 bg-slate-100 px-3 py-1 rounded-xl">
-								100% Total
+function MetricCard(props) {
+	return (
+		<article class="metric-card">
+			<div class="metric-card-top">
+				<span>{props.label}</span>
+				<span class="metric-icon">{props.icon}</span>
+			</div>
+			<div class="metric-value">
+				{props.value} <small>{props.suffix}</small>
+			</div>
+			<p>
+				{props.progress !== undefined ? (
+					<span class="metric-progress">
+						<span style={{ width: `${props.progress}%` }} />
+					</span>
+				) : (
+					<span class="metric-dot" />
+				)}{" "}
+				{props.detail}
+			</p>
+		</article>
+	);
+}
+function Panel(props) {
+	return (
+		<article class="chart-panel">
+			<div class="panel-heading">
+				<div>
+					<h2>{props.title}</h2>
+					<p>{props.subtitle}</p>
+				</div>
+				<span class="panel-tag">{props.tag}</span>
+			</div>
+			{props.children}
+		</article>
+	);
+}
+function TrendChart(props) {
+	const max = () => Math.max(...props.data.map((item) => item.count), 1);
+	const points = () =>
+		props.data
+			.map(
+				(item, index) =>
+					`${30 + index * 116},${150 - (item.count / max()) * 116}`,
+			)
+			.join(" ");
+	const areaPoints = () =>
+		`30,150 ${points()} ${30 + (props.data.length - 1) * 116},150`;
+	return (
+		<div class="trend-chart">
+			<svg
+				viewBox="0 0 620 190"
+				role="img"
+				aria-label="Tren kegiatan enam bulan"
+			>
+				<defs>
+					<linearGradient id="trend-fill" x1="0" x2="0" y1="0" y2="1">
+						<stop offset="0%" stop-color="#6366f1" stop-opacity=".34" />
+						<stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
+					</linearGradient>
+				</defs>
+				<line x1="30" y1="34" x2="610" y2="34" class="chart-grid-line" />
+				<line x1="30" y1="92" x2="610" y2="92" class="chart-grid-line" />
+				<line x1="30" y1="150" x2="610" y2="150" class="chart-grid-line" />
+				<polygon points={areaPoints()} fill="url(#trend-fill)" />
+				<polyline points={points()} class="trend-line" />
+				{props.data.map((item, index) => (
+					<circle
+						cx={30 + index * 116}
+						cy={150 - (item.count / max()) * 116}
+						r="4"
+						class="trend-point"
+					/>
+				))}
+			</svg>
+			<div class="chart-labels">
+				<For each={props.data}>{(item) => <span>{item.label}</span>}</For>
+			</div>
+			<div class="panel-footnote">
+				<span>
+					<i class="legend-dot" /> Kegiatan per bulan
+				</span>
+				<span>Data real-time dari kegiatan</span>
+			</div>
+		</div>
+	);
+}
+function CategoryChart(props) {
+	const total = () => props.total || 1;
+	const gradient = () => {
+		let cursor = 0;
+		return props.data
+			.map((item) => {
+				const start = cursor;
+				cursor += (item.count / total()) * 360;
+				return `${item.color} ${start}deg ${cursor}deg`;
+			})
+			.join(", ");
+	};
+	return (
+		<div class="category-chart">
+			<div
+				class="donut"
+				style={{ background: `conic-gradient(${gradient()})` }}
+			>
+				<div class="donut-hole">
+					<strong>{props.total}</strong>
+					<span>kegiatan</span>
+				</div>
+			</div>
+			<div class="category-legend">
+				<For each={props.data}>
+					{(item) => (
+						<div>
+							<span>
+								<i style={{ background: item.color }} />
+								{item.key}
 							</span>
+							<strong>
+								{item.count}{" "}
+								<small>({Math.round((item.count / total()) * 100)}%)</small>
+							</strong>
 						</div>
-
-						<div class="space-y-2">
-							<div class="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden flex">
-								<div
-									class="bg-emerald-500 h-full transition-all duration-500"
-									style={{ width: `${stats().Selesai.pct}%` }}
-								/>
-								<div
-									class="bg-amber-500 h-full transition-all duration-500"
-									style={{ width: `${stats().Berlangsung.pct}%` }}
-								/>
-								<div
-									class="bg-blue-500 h-full transition-all duration-500"
-									style={{ width: `${stats().Rencana.pct}%` }}
-								/>
-								<div
-									class="bg-rose-500 h-full transition-all duration-500"
-									style={{ width: `${stats().Dibatalkan.pct}%` }}
-								/>
-							</div>
-
-							<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-								<div class="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200/80">
-									<div class="text-[10px] font-extrabold text-emerald-800 uppercase flex items-center space-x-1">
-										<span class="w-2 h-2 rounded-full bg-emerald-500" />
-										<span>Selesai</span>
-									</div>
-									<div class="text-lg font-black text-emerald-900 mt-1">
-										{stats().Selesai.count}{" "}
-										<span class="text-xs font-bold text-emerald-700">
-											({stats().Selesai.pct}%)
-										</span>
-									</div>
-								</div>
-
-								<div class="p-3 bg-amber-50/70 rounded-2xl border border-amber-200/80">
-									<div class="text-[10px] font-extrabold text-amber-800 uppercase flex items-center space-x-1">
-										<span class="w-2 h-2 rounded-full bg-amber-500" />
-										<span>Berlangsung</span>
-									</div>
-									<div class="text-lg font-black text-amber-900 mt-1">
-										{stats().Berlangsung.count}{" "}
-										<span class="text-xs font-bold text-amber-700">
-											({stats().Berlangsung.pct}%)
-										</span>
-									</div>
-								</div>
-
-								<div class="p-3 bg-blue-50/70 rounded-2xl border border-blue-200/80">
-									<div class="text-[10px] font-extrabold text-blue-800 uppercase flex items-center space-x-1">
-										<span class="w-2 h-2 rounded-full bg-blue-500" />
-										<span>Rencana</span>
-									</div>
-									<div class="text-lg font-black text-blue-900 mt-1">
-										{stats().Rencana.count}{" "}
-										<span class="text-xs font-bold text-blue-700">
-											({stats().Rencana.pct}%)
-										</span>
-									</div>
-								</div>
-
-								<div class="p-3 bg-rose-50/70 rounded-2xl border border-rose-200/80">
-									<div class="text-[10px] font-extrabold text-rose-800 uppercase flex items-center space-x-1">
-										<span class="w-2 h-2 rounded-full bg-rose-500" />
-										<span>Dibatalkan</span>
-									</div>
-									<div class="text-lg font-black text-rose-900 mt-1">
-										{stats().Dibatalkan.count}{" "}
-										<span class="text-xs font-bold text-rose-700">
-											({stats().Dibatalkan.pct}%)
-										</span>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm space-y-4">
-						<div class="flex items-center justify-between border-b border-slate-100 pb-3">
-							<div class="flex items-center space-x-2">
-								<div class="p-2 bg-orange-50 text-orange-600 rounded-xl">
-									<FiBriefcase />
-								</div>
-								<div>
-									<h2 class="text-sm font-medium text-slate-900 uppercase tracking-wide">
-										Statistika Kategori Kegiatan
-									</h2>
-									<p class="text-[11px] text-slate-500">
-										Distribusi berdasarkan jenis penugasan dinas
-									</p>
-								</div>
-							</div>
-						</div>
-
-						<div class="space-y-3">
-							{categoryStats().length === 0 ? (
-								<div class="py-4 text-center text-xs text-slate-400">
-									Belum ada data kategori.
-								</div>
-							) : (
-								categoryStats().map((item) => (
-									<div class="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/70 space-y-2">
-										<div class="flex items-center justify-between text-xs">
-											<div class="flex items-center space-x-2">
-												<span
-													class={`px-2.5 py-0.5 rounded-lg font-black text-[10px] ${item.meta.bg} ${item.meta.text}`}
-												>
-													{item.key}
-												</span>
-												<span class="font-extrabold text-slate-900">
-													{item.meta.full}
-												</span>
-											</div>
-											<span class="font-black text-slate-900">
-												{item.count} Kegiatan{" "}
-												<span class="text-slate-400 font-bold">
-													({item.pct}%)
-												</span>
-											</span>
-										</div>
-
-										<div class="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
-											<div
-												class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500"
-												style={{ width: `${item.pct}%` }}
-											/>
-										</div>
-									</div>
-								))
-							)}
-						</div>
-					</div>
-				</div>
-
-				<div class="lg:col-span-5 space-y-6">
-					<div class="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm space-y-4">
-						<div class="flex items-center justify-between border-b border-slate-100 pb-3">
-							<div class="flex items-center space-x-2">
-								<div class="p-2 bg-orange-50 text-orange-600 rounded-xl">
-									<FiCalendar />
-								</div>
-								<div>
-									<h2 class="text-sm font-medium text-slate-900 uppercase tracking-wide">
-										Agenda Terbaru
-									</h2>
-									<p class="text-[11px] text-slate-500">
-										Aktivitas kegiatan terdaftar terkini
-									</p>
-								</div>
-							</div>
-
-							<button
-								type="button"
-								onClick={() => handleSelectTab("list")}
-								class="text-xs font-bold text-orange-600 hover:underline flex items-center space-x-1"
-							>
-								<span>Semua</span>
-								<span>→</span>
-							</button>
-						</div>
-
-						<div class=":uno: space-y-3">
-							{recentActivities().length === 0 ? (
-								<div class="py-8 text-center text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-									Belum ada kegiatan yang dicatat.
-								</div>
-							) : (
-								recentActivities().map((act) => {
-									const catMeta =
-										CATEGORY_LABELS[act.kategori] || CATEGORY_LABELS.Lainnya;
-									const statusMeta =
-										STATUS_LABELS[act.status] || STATUS_LABELS.Rencana;
-
-									return (
-										<div class="p-3.5 bg-slate-50 hover:bg-orange-50/50 border border-slate-200/80 hover:border-orange-200 rounded-2xl transition-all cursor-pointer space-y-2 group">
-											<div class="flex items-center justify-between">
-												<span
-													class={`px-2 py-0.5 rounded-md text-[10px] font-black ${catMeta.bg} ${catMeta.text}`}
-												>
-													{act.kategori}
-												</span>
-												<span
-													class={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${statusMeta.bg}`}
-												>
-													<span
-														class={`w-1.5 h-1.5 rounded-full ${statusMeta.dot}`}
-													/>
-													<span>{act.status}</span>
-												</span>
-											</div>
-
-											<h3 class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition-colors line-clamp-1">
-												{act.namaKegiatan}
-											</h3>
-
-											<div class="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-												<div class="flex items-center space-x-2 text-slate-700">
-													<span class="text-orange-500">
-														<FiCalendar size={12} />
-													</span>
-													<span>{act.tanggalMulai}</span>
-												</div>
-												<span class="flex items-center space-x-1 text-slate-600">
-													<span class="text-orange-500">
-														<FiUser size={12} />
-													</span>
-													<span>{act.pegawaiIds.length} Pegawai</span>
-												</span>
-											</div>
-										</div>
-									);
-								})
-							)}
-						</div>
-					</div>
-				</div>
+					)}
+				</For>
 			</div>
+		</div>
+	);
+}
+function LocationChart(props) {
+	const max = () => Math.max(...props.data.map((item) => item.count), 1);
+	return (
+		<div class="division-chart">
+			<div class="bar-grid">
+				<span>Kegiatan</span>
+				<span>{max()}</span>
+				<span>{Math.ceil(max() * 0.75)}</span>
+				<span>{Math.ceil(max() * 0.5)}</span>
+				<span>{Math.ceil(max() * 0.25)}</span>
+				<span>0</span>
+			</div>
+			<div class="bars">
+				<For each={props.data}>
+					{(item) => (
+						<div class="bar-column">
+							<div class="bar-value">{item.count}</div>
+							<div
+								class="bar"
+								style={{
+									height: `${Math.max(7, (item.count / max()) * 150)}px`,
+								}}
+							/>
+							<span>{item.label}</span>
+						</div>
+					)}
+				</For>
+			</div>
+		</div>
+	);
+}
+function StatusChart(props) {
+	return (
+		<div class="status-chart">
+			<For each={props.data}>
+				{(item) => (
+					<div class="status-row">
+						<div>
+							<span>{item.key}</span>
+							<strong>{item.count}</strong>
+						</div>
+						<div class="status-track">
+							<span
+								style={{
+									width: `${props.total ? (item.count / props.total) * 100 : 0}%`,
+									background: item.color,
+								}}
+							/>
+						</div>
+					</div>
+				)}
+			</For>
+			<button type="button" class="detail-action" onClick={props.onDetail}>
+				Lihat Detail di Tabel Kegiatan <FiArrowUpRight size={14} />
+			</button>
+		</div>
+	);
+}
+function EmployeeRanking(props) {
+	return (
+		<div class="employee-ranking">
+			<Show
+				when={props.data.length}
+				fallback={<div class="empty-chart">Belum ada kontribusi kegiatan.</div>}
+			>
+				<For each={props.data}>
+					{(item, index) => (
+						<div class="employee-row">
+							<span class="rank">{index() + 1}</span>
+							<div class="employee-name">
+								<strong>{item.employee.nama}</strong>
+								<span>
+									{item.employee.divisi || item.employee.unit || "Umum"}
+								</span>
+							</div>
+							<div class="employee-total">
+								<strong>{formatNumber(item.hours)} Jam</strong>
+								<span>{item.count} Kegiatan</span>
+							</div>
+						</div>
+					)}
+				</For>
+			</Show>
+		</div>
+	);
+}
+function DashboardLoading() {
+	return (
+		<div class="dashboard-loading">
+			<div />
+			<div />
+			<div />
+			<div />
 		</div>
 	);
 }

@@ -396,25 +396,18 @@ export default function FormKegiatanPage() {
 
 			<div class=":uno: animate-fade-in">
 				{/* Card: Page Header */}
-				<div class=":uno: layout-light relative p-6 rounded-3xl bg-[var(--surface)] shadow-md">
-					<div class=":uno: relative space-y-2">
-						<div class=":uno: flex items-center gap-4">
-							<div class=":uno: flex items-center justify-center bg-gradient-to-br from-amber-500 to-orange-600 ring-2 ring-amber-600/20 text-white size-8 rounded-lg">
-								<FiFilePlus stroke-width={1.5} size={18} />
-							</div>
-							<Badge color="orange" size="md">
-								Input Kegiatan
-							</Badge>
+				<div class=":uno: dashboard-header">
+					<div>
+						<div class=":uno: dashboard-kicker">
+							<FiFilePlus size={14} /> DATA ENTRY
 						</div>
-						<div class=":uno: space-y-1">
-							<h1 class=":uno: font-semibold text-xl text-[var(--title)] md:text-2xl">
-								Formulir Kegiatan {formType() === "balai" ? "Balai" : "Pegawai"}
-							</h1>
-							<p class=":uno: mt-0.5 text-[11px] text-[var(--text-muted)] leading-4 md:text-sm">
-								Isi data terkait kegiatan yang akan dilaksanakan dan pegawai
-								yang berpartisipasi dalam kegiatan
-							</p>
-						</div>
+						<h1>
+							Formulir Kegiatan {formType() === "balai" ? "Balai" : "Pegawai"}
+						</h1>
+						<p>
+							Isi data terkait kegiatan yang akan dilaksanakan dan pegawai yang
+							berpartisipasi dalam kegiatan
+						</p>
 					</div>
 				</div>
 
@@ -512,10 +505,10 @@ export default function FormKegiatanPage() {
 															id={`cat-${cat.key}`}
 															onClick={() => setKategori(cat.label)}
 															classList={{
-																"bg-primary/5 border-primary/80":
+																"bg-[#4f46e5]/5 border-[#4f46e5]/60":
 																	kategori() === cat.label,
 															}}
-															class=":uno: relative flex items-center gap-2 py-1 px-3 text-xs text-[var(--text)] w-full bg-slate-50/50 border border-slate-200 rounded-xl focus:(border-primary/80 outline-2 outline-primary/20 bg-primary/5) transition-colors duration-200"
+															class=":uno: relative flex items-center gap-2 py-1 px-3 text-xs text-[var(--text)] w-full bg-slate-50/50 border border-slate-200 rounded-xl focus:(border-[#4f46e5]/80 outline-2 outline-[#4f46e5]/20 bg-[#4f46e5]/5) transition-colors duration-200"
 														>
 															<div class=":uno: block min-w-16">
 																<KategoriBadge type={cat.label} />
@@ -549,10 +542,10 @@ export default function FormKegiatanPage() {
 										description="Tentukan waktu mulai serta selesai"
 									/>
 									<div class=":uno: grid md:grid-cols-2 gap-4">
-										<div class="py-2 px-4 relative bg-gradient-to-br from-emerald-50/70 to-teal-50/40 rounded-2xl border border-emerald-200/80 space-y-2">
+										<div class="py-3 px-4 relative bg-indigo-50/35 rounded-2xl border border-indigo-200/70 space-y-2">
 											<label
 												for="waktu-mulai"
-												class="block text-xs font-black text-emerald-950 uppercase tracking-wide flex items-center justify-between"
+												class="block text-xs font-black text-indigo-950 uppercase tracking-wide flex items-center justify-between"
 											>
 												Waktu Mulai Kegiatan
 											</label>
@@ -561,19 +554,19 @@ export default function FormKegiatanPage() {
 												id="waktu-mulai"
 												value={waktuMulai()}
 												onInput={(e) => setWaktuMulai(e.currentTarget.value)}
-												class=":uno: py-2.5 px-3 text-xs text-[var(--text)] w-full bg-slate-50/50 border border-emerald-200 rounded-xl focus:(border-emerald-500/80 outline-2 outline-emerald-500/20) transition-colors duration-200"
+												class=":uno: py-2.5 px-3 text-xs text-[var(--text)] w-full bg-white/80 border border-indigo-200 rounded-xl focus:(border-indigo-500/80 outline-2 outline-indigo-500/20) transition-colors duration-200"
 											/>
-											<p class="text-[10px] text-emerald-700 flex items-center space-x-1">
+											<p class="text-[10px] text-indigo-700 flex items-center space-x-1">
 												<FiInfo size={12} stroke-width={1.5} />
 												<span class=":uno: text-[var(--text)]">
 													Pilih tanggal dan jam dimulainya kegiatan
 												</span>
 											</p>
 										</div>
-										<div class="py-2 px-4 bg-gradient-to-br from-yellow-50/70 to-amber-50/40 rounded-2xl border border-yellow-200/80 space-y-2">
+										<div class="py-3 px-4 bg-slate-50/70 rounded-2xl border border-slate-200 space-y-2">
 											<label
 												for="waktu-selesai"
-												class="block text-xs font-black text-yellow-950 uppercase tracking-wide flex items-center justify-between"
+												class="block text-xs font-black text-slate-800 uppercase tracking-wide flex items-center justify-between"
 											>
 												Waktu Selesai Kegiatan
 											</label>
@@ -582,9 +575,9 @@ export default function FormKegiatanPage() {
 												id="waktu-selesai"
 												value={waktuSelesai()}
 												onInput={(e) => setWaktuSelesai(e.currentTarget.value)}
-												class=":uno: py-2.5 px-3 text-xs text-[var(--text)] w-full bg-slate-50/50 border border-yellow-200 rounded-xl focus:(border-yellow-500/80 outline-2 outline-yellow-500/20) transition-colors duration-200"
+												class=":uno: py-2.5 px-3 text-xs text-[var(--text)] w-full bg-white border border-slate-200 rounded-xl focus:(border-indigo-500/80 outline-2 outline-indigo-500/20) transition-colors duration-200"
 											/>
-											<p class="text-[10px] text-yellow-700 flex items-center space-x-1">
+											<p class="text-[10px] text-slate-500 flex items-center space-x-1">
 												<FiInfo size={12} stroke-width={1.5} />
 												<span class=":uno: text-[var(--text)]">
 													Pilih perkiraan tanggal dan jam selesai
@@ -617,7 +610,18 @@ export default function FormKegiatanPage() {
 															id={`status-${stat.key}`}
 															onClick={() => setStatus(stat.key)}
 															classList={{
-																[stat.active]: status() === stat.key,
+																"bg-indigo-50 text-indigo-700 border-indigo-300 shadow-sm":
+																	status() === stat.key &&
+																	stat.key === "terjadwal",
+																"bg-amber-50 text-amber-700 border-amber-300 shadow-sm":
+																	status() === stat.key &&
+																	stat.key === "berlangsung",
+																"bg-emerald-50 text-emerald-700 border-emerald-300 shadow-sm":
+																	status() === stat.key &&
+																	stat.key === "selesai",
+																"bg-rose-50 text-rose-700 border-rose-300 shadow-sm":
+																	status() === stat.key &&
+																	stat.key === "dibatalkan",
 															}}
 															class=":uno: font-bold text-[var(--title)] border text-xs rounded-2xl w-full h-12 p-2 border-[var(--border)] bg-slate-50 transition-colors ease-in-out duration-300"
 														>

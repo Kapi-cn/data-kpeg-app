@@ -159,46 +159,42 @@ export default function ListKegiatanPage() {
 				{/* Container */}
 				<div class=":uno: space-y-6">
 					{/* Card: Page Header */}
-					<div class=":uno: flex flex-col items-start gap-2 bg-[var(--surface)] layout-light rounded-3xl p-6 shadow-xs">
-						<Badge color="yellow" size="md">
-							<FiFileMinus size={16} stroke-width={2} /> Arsip Digital Kegiatan
-							Dinas
-						</Badge>
-
-						<div class=":uno: flex flex-col lg:(flex-row justify-between) gap-6 w-full">
+					<div class=":uno: dashboard-header">
+						<div>
+							<div class=":uno: dashboard-kicker">
+								<FiCalendar size={14} /> DATA MANAGEMENT
+							</div>
 							<div>
-								<h1 class=":uno: text-2xl font-bold md:font-black text-[var(--title)]">
-									Daftar Kegiatan & Tugas Pegawai
-								</h1>
-								<p class=":uno: text-xs text-[var(--text-muted)] mt-1">
+								<h1>Daftar Kegiatan &amp; Tugas Pegawai</h1>
+								<p>
 									Menampilkan agenda kegiatan pegawai dengan filter sederhana
 									dan opsi pencetakan.
 								</p>
 							</div>
+						</div>
 
-							<div class=":uno: flex flex-col gap-2 items-end justify-center md:(flex-row justify-end)">
-								<button
-									type="button"
-									onClick={() => {
-										closeSidebar();
-										setPrintModalOpen(true);
-									}}
-									class=":uno: flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r text-nowrap from-orange-500 to-amber-500 text-white rounded-2xl text-xs font-bold cursor-pointer"
-								>
-									<FiPrinter size={16} stroke-width={2} /> Cetak Laporan PDF
-								</button>
+						<div class=":uno: grid grid-cols-2 gap-3 w-full lg:max-w-sm">
+							<button
+								type="button"
+								onClick={() => {
+									closeSidebar();
+									setPrintModalOpen(true);
+								}}
+								class=":uno: outline-action text-nowrap"
+							>
+								<FiPrinter size={16} stroke-width={2} /> Cetak Laporan PDF
+							</button>
 
-								<button
-									type="button"
-									onClick={() => navigate("/kegiatan/baru", { replace: true })}
-									class=":uno: flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white rounded-2xl text-xs font-bold border border-slate-700 text-nowrap cursor-pointer"
-								>
-									<div class=":uno: text-orange-400">
-										<FiPlus size={16} stroke-width={2} />
-									</div>
-									Tambah Data
-								</button>
-							</div>
+							<button
+								type="button"
+								onClick={() => navigate("/kegiatan/baru", { replace: true })}
+								class=":uno: primary-action"
+							>
+								<div class="">
+									<FiPlus size={16} stroke-width={3} />
+								</div>
+								Tambah Data
+							</button>
 						</div>
 					</div>
 

@@ -219,12 +219,12 @@ export default function Sidebar() {
 										}}
 										class=":uno: w-full flex text-[var(--text-title)] items-center gap-3 px-3 py-2.5 text-xs font-bold rounded-2xl transition-all ease-out duration-300"
 									>
-										<div class=":uno: text-yellow-500">
+										<div class=":uno: text-amber-500">
 											<FiUsers size={18} stroke-width={1.5} />
 										</div>
 										Master Pegawai
 										<div class=":uno: ml-auto">
-											<Badge size="xs">
+											<Badge size="xs" color="indigo">
 												{pegawaiCount() !== null
 													? `${pegawaiCount()} Peg`
 													: "..."}
@@ -247,7 +247,9 @@ export default function Sidebar() {
 									</div>
 									Cetak Laporan PDF
 									<div class=":uno: ml-auto">
-										<Badge size="xs">PDF</Badge>
+										<Badge size="xs" color="indigo">
+											PDF
+										</Badge>
 									</div>
 								</A>
 							</li>
